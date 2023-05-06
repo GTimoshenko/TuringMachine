@@ -4,14 +4,31 @@
 #include <vector>
 #include <Windows.h>
 using namespace std;
+
+//Achtung
+
+//--- Achtung!
+// hConsole - переменная, с помощью которой мы получаем дескриптор консоли, позволяющий изменять формат ввода/вывода.
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
+/* Структура table хранит в себе 
+* char command - символ(>, <, .), как должна двигаться головка машины
+* char pastingSymbol - символ, на который будет заменен текущий
+* int condition - состояние, в которое перейдет машина
+*/
 typedef struct table {
 	char command;
 	char pastingSymbol;
 	int condition;
 }table;
 
+/* Функция readConsole получает на вход
+* string a - строка, считываемая из консоли
+* Далее функция обрабатывает эту строку, проверяет на наличие не соответствующих условию символов.
+* Возвращает переменную типа int inputIsCorrect, которая принимает значение 0, если строка не подходит,
+* значение 1, если строка - подходящая.
+* Проверяет строку на валидность.
+*/
 bool readConsole(string a) {
 	int inputIsCorrect = 1;
 
@@ -25,7 +42,11 @@ bool readConsole(string a) {
 	return inputIsCorrect;
 }
 
-
+/*Функция readInput получает на вход string fileName - название файла, в котором описаны состояния машины.
+* Возвращает map<char, vector<table>> inputTable - map, в которой ключом являются символы алфавита машины,
+* vector<table> - вектор структур table, хранящий для каждого состояния данные из структуры.
+* Функция заполняет этот map.
+*/
 map <char, vector<table>> readInput(string fileName) {
 	ifstream fin(fileName);
 	int alphabetSize, numOfConditions;
@@ -53,6 +74,14 @@ map <char, vector<table>> readInput(string fileName) {
 	return inputTable;
 }
 
+/*Функция compMachineStep получает на вход:
+* map<char, vector<table>>& condTable - адрес map<char, vector<table>>, хранящей считанную таблицу состояний машины
+* string& inputStr - адрес переменной, хранящей считанную строку.
+* int& currCondition - адрес переменной, хранящей нынешнее состояние машины.
+* int& currPosition - адрес переменной, хранящей индекс символа, обрабатывающегося в данный момент.
+* Функция делает выполняет шаг по таблице переходов машины.
+* Ничего не возвращает.
+*/
 void compMachineStep(map<char, vector<table>>& condTable, string& inputStr, int& currCondition, int& currPosition) {
 	char prevSymbol = inputStr[currPosition];
 
@@ -76,6 +105,12 @@ void compMachineStep(map<char, vector<table>>& condTable, string& inputStr, int&
 	currCondition = condTable[prevSymbol][currCondition].condition;
 }
 
+/* Функция printCurrSymbolPointer получает на вход:
+* string& inputString - адрес переменной, хранящей считанную строку. 
+* int& currPosition - адрес переменной, хранящей индекс символа, обрабатывающегося в данный момент.
+* int& isFirstTime - адрес переменной, хранящей 0 или 1 в зависимости от того, в первый раз ли выводится строка или нет.
+* Ничего не возвращает
+*/
 void printCurrSymbolPointer(string& inputString, int& currPosition, int& isFirstTime) {
 	if (!isFirstTime) {
 		cout << endl << "Начальная конфигурация: ";
@@ -83,9 +118,9 @@ void printCurrSymbolPointer(string& inputString, int& currPosition, int& isFirst
 	}
 	for (int i = 0; i < inputString.size(); i++) {
 		if (i == currPosition) {
-			SetConsoleTextAttribute(hConsole, 4);
+			SetConsoleTextAttribute(hConsole, 4); //--- Red color
 			cout << inputString[i];
-			SetConsoleTextAttribute(hConsole, 7);
+			SetConsoleTextAttribute(hConsole, 7); //--- Default color
 		}
 		else cout << inputString[i];
 	}
